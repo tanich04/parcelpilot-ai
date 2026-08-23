@@ -2,7 +2,7 @@
 src/agent/router.py
 Intelligent Router - Parses intent and builds context without excessive LLM calls
 """
-
+import os
 import re
 import sqlite3
 from typing import Dict, Any, Optional, Tuple, List
