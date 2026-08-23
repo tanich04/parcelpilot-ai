@@ -23,8 +23,8 @@ COPY . .
 RUN mkdir -p /app/data/pdfs /app/data/excel /app/chroma_db
 
 # Expose ports
-EXPOSE 8000  
+EXPOSE 8000
 EXPOSE 8501
 
-# Default command (will be overridden in docker-compose)
+# Default command
 CMD ["uvicorn", "src.api.endpoints:app", "--host", "0.0.0.0", "--port", "8000"]
