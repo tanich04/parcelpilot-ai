@@ -46,6 +46,6 @@ print('✅ Tables created!')
       - key: LLM_MODEL
         value: openai/gpt-oss-120b
       - key: DB_PATH
-        value: /opt/render/project/src/parcelpilot.db
+        value: ./parcelpilot.db
       - key: CHROMA_PATH
-        value: /opt/render/project/src/chroma_db
+        value: ./chroma_db
