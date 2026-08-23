@@ -7,8 +7,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# The path is now configurable via an environment variable, with a fallback
-DB_PATH = os.environ.get("DB_PATH", "/opt/render/project/src/parcelpilot.db")
+from src.config import DB_PATH
+
+print("Using DB:", DB_PATH)
 
 def init_database():
     """Create all tables if they don't exist."""
