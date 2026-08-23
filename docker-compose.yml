@@ -1,0 +1,39 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # API Service
+  api:
+    build: .
+    container_name: parcelpilot-api
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LLM_MODEL=${LLM_MODEL:-openai/gpt-oss-120b}
+      - DB_PATH=/app/parcelpilot.db
+      - CHROMA_PATH=/app/chroma_db
+    volumes:
+      - ./parcelpilot.db:/app/parcelpilot.db
+      - ./chroma_db:/app/chroma_db
+      - ./data:/app/data
+    command: uvicorn src.api.endpoints:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+
+  # Streamlit UI Service
+  ui:
+    build: .
+    container_name: parcelpilot-ui
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://api:8000
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    volumes:
+      - ./parcelpilot.db:/app/parcelpilot.db
+      - ./chroma_db:/app/chroma_db
+      - ./data:/app/data
+    command: streamlit run src/ui/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    depends_on:
+      - api
+    restart: unless-stopped

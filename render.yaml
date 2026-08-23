@@ -1,0 +1,18 @@
+# render.yaml
+services:
+  - type: web
+    name: parcelpilot-api
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      python -c "from src.ingestion.data_loader import DataLoader; DataLoader().load_excel('data/excel/ParcelPilot_Assessment_Data.xlsx'); DataLoader().load_pdfs('data/pdfs')"
+    startCommand: uvicorn src.api.endpoints:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: openai/gpt-oss-120b
+      - key: DB_PATH
+        value: /opt/render/project/src/parcelpilot.db
+      - key: CHROMA_PATH
+        value: /opt/render/project/src/chroma_db
