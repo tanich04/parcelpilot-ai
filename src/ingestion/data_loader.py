@@ -6,9 +6,11 @@ import json
 import logging
 from src.database.sqlite_db import SQLiteDB
 from src.vector_store.chroma_store import ChromaVectorStore
+from src.config import DB_PATH
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+print("Using DB:", DB_PATH)
 
 class DataLoader:
     def __init__(self):
