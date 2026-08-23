@@ -2,17 +2,15 @@
 import sqlite3
 import logging
 import os
+from src.config import DB_PATH
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class SQLiteDB:
     def __init__(self, db_path=None):
-        self.db_path = os.getenv(
-            "DB_PATH",
-            "/opt/render/project/src/parcelpilot.db"
-        )
-
+        self.db_path = db_path or DB_PATH
+        
         logger.info(f"Using SQLite database: {self.db_path}")
 
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
