@@ -5,7 +5,27 @@ services:
     env: python
     buildCommand: |
       pip install -r requirements.txt
+      
+      echo "📥 Downloading data from Google Drive..."
+      mkdir -p data/pdfs data/excel
+      
+      # Download Excel
+      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1F_HPGQIwdfi6U9hr8E4UiodklVdXLiBW' -O data/excel/ParcelPilot_Assessment_Data.xlsx
+      
+      # Download PDFs
+      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1X-fpuMsb3hwx5hsK3pwgoqb4m4nxCOJH' -O data/pdfs/01_Support_Policy_v3_CURRENT.pdf
+      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1u5gTNIqqcbFYwl_fOkl9dfuAaLHcNoYp' -O data/pdfs/02_Support_Policy_v2_DEPRECATED.pdf
+      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=14Abbmi-ji98KhlWrDLBkdl6c6-ggNEXR' -O data/pdfs/03_Cancellation_and_Service_Credit_SOP_v4.pdf
+      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1I9ofIn9gqOlHzpmWncl6mJ4YQuTX0HPx' -O data/pdfs/04_Product_Operations_Guide_and_Known_Issues.pdf
+      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1sC_cN29oCEHvmAELgMRdn91njIMFU17e' -O data/pdfs/05_Northstar_Logistics_Enterprise_Agreement.pdf
+      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1j_O-As-w6biUXSXlefpka4SjvSoqhoV7' -O data/pdfs/06_LumenWorks_Service_Agreement.pdf
+      
+      echo "✅ Data downloaded!"
+      
+      # Initialize database and load data
+      python -c "from src.ingestion.init_db import init_database; init_database()"
       python -c "from src.ingestion.data_loader import DataLoader; DataLoader().load_excel('data/excel/ParcelPilot_Assessment_Data.xlsx'); DataLoader().load_pdfs('data/pdfs')"
+      
     startCommand: uvicorn src.api.endpoints:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GROQ_API_KEY
