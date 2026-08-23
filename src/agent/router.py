@@ -145,7 +145,13 @@ class IntentRouter:
             "role": role,
             "account_scope": account_scope
         }
-        
+        print("=" * 60)
+        print("DB PATH:", self.db_path)
+        print("Exists:", os.path.exists(self.db_path))
+        print("Directory exists:", os.path.exists(os.path.dirname(self.db_path)))
+        print("Files in directory:")
+        print(os.listdir(os.path.dirname(self.db_path)))
+        print("=" * 60)
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
