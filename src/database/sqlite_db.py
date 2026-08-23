@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 class SQLiteDB:
     def __init__(self, db_path=None):
-        self.db_path = db_path or os.getenv(
+        self.db_path = os.getenv(
             "DB_PATH",
-            os.path.join(os.getcwd(), "parcelpilot.db")
+            "/opt/render/project/src/parcelpilot.db"
         )
 
         logger.info(f"Using SQLite database: {self.db_path}")
