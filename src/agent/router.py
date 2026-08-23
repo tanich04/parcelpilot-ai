@@ -20,7 +20,8 @@ class IntentRouter:
     """
     
     def __init__(self):
-        self.db_path = "parcelpilot.db"
+        self.db_path = os.environ.get("DB_PATH", "parcelpilot.db")
+        print(f"🔍 Router using database at: {self.db_path}")
     
     def route(self, query: str, account_id: Optional[str] = None, 
               role: str = "customer", account_scope: str = "single") -> Dict[str, Any]:
