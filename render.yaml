@@ -6,7 +6,7 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       python -c "from src.ingestion.data_loader import DataLoader; DataLoader().load_excel('data/excel/ParcelPilot_Assessment_Data.xlsx'); DataLoader().load_pdfs('data/pdfs')"
-    startCommand: uvicorn src.api.endpoints:app --host 0.0.0.0 --port 10000
+    startCommand: uvicorn src.api.endpoints:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GROQ_API_KEY
         sync: false
