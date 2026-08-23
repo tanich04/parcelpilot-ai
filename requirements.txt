@@ -7,7 +7,6 @@ pydantic==2.5.0
 
 # Database
 sqlalchemy==2.0.23
-sqlite3
 
 # Vector Store & AI
 chromadb==0.4.22
