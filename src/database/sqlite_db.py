@@ -1,16 +1,28 @@
 # src/database/sqlite_db.py
 import sqlite3
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class SQLiteDB:
-    def __init__(self, db_path="parcelpilot.db"):
-        self.db_path = db_path
+    def __init__(self, db_path=None):
+        self.db_path = db_path or os.getenv(
+            "DB_PATH",
+            os.path.join(os.getcwd(), "parcelpilot.db")
+        )
+
+        logger.info(f"Using SQLite database: {self.db_path}")
+
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+
         self._init_db()
     
     def _init_db(self):
+        logger.info(f"Initializing database: {self.db_path}")
+        logger.info(f"Exists: {os.path.exists(self.db_path)}")
+        logger.info(f"Directory: {os.path.dirname(self.db_path)}")
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
@@ -84,7 +96,8 @@ class SQLiteDB:
         logger.info("✅ SQLite database initialized with correct schema")
     
     def get_connection(self):
-        return sqlite3.connect(self.db_path)
+        logger.info(f"Opening database: {self.db_path}")
+        return sqlite3.connect(self.db_path)   
 
 if __name__ == "__main__":
     db = SQLiteDB()
