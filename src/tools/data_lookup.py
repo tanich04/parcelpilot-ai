@@ -13,17 +13,12 @@ import sqlite3
 import logging
 from datetime import datetime
 from typing import Optional, Dict, Any
+from src.config import DB_PATH
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 import os
-
-DB_PATH = os.getenv(
-    "DB_PATH",
-    "/opt/render/project/src/parcelpilot.db"
-)
-
 
 def get_db_connection():
     """Get a connection to the SQLite database"""
