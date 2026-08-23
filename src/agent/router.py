@@ -10,7 +10,7 @@ from src.tools.doc_search import search_documents
 from src.vector_store.chroma_store import get_vector_store
 from src.agent.prompts import SYSTEM_PROMPT
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-
+from src.config import DB_PATH
 
 class IntentRouter:
     """
@@ -20,7 +20,7 @@ class IntentRouter:
     """
     
     def __init__(self):
-        self.db_path = os.environ.get("DB_PATH", "parcelpilot.db")
+        self.db_path = DB_PATH
         print(f"🔍 Router using database at: {self.db_path}")
     
     def route(self, query: str, account_id: Optional[str] = None, 
