@@ -17,7 +17,12 @@ from typing import Optional, Dict, Any
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DB_PATH = "parcelpilot.db"
+import os
+
+DB_PATH = os.getenv(
+    "DB_PATH",
+    "/opt/render/project/src/parcelpilot.db"
+)
 
 
 def get_db_connection():
