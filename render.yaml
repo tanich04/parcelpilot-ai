@@ -1,3 +1,4 @@
+# render.yaml
 services:
   - type: web
     name: parcelpilot-api
@@ -5,47 +6,62 @@ services:
     buildCommand: |
       pip install -r requirements.txt
       
-      echo "📥 Downloading data..."
+      echo "📂 Creating directories..."
+      mkdir -p /opt/render/project/src
       mkdir -p data/pdfs data/excel
       
-      # Download Excel
-      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1F_HPGQIwdfi6U9hr8E4UiodklVdXLiBW' -O data/excel/ParcelPilot_Assessment_Data.xlsx
+      echo "📥 Downloading data..."
+      # ... download commands ...
       
-      # Download PDFs
-      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1X-fpuMsb3hwx5hsK3pwgoqb4m4nxCOJH' -O data/pdfs/01_Support_Policy_v3_CURRENT.pdf
-      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1u5gTNIqqcbFYwl_fOkl9dfuAaLHcNoYp' -O data/pdfs/02_Support_Policy_v2_DEPRECATED.pdf
-      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=14Abbmi-ji98KhlWrDLBkdl6c6-ggNEXR' -O data/pdfs/03_Cancellation_and_Service_Credit_SOP_v4.pdf
-      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1I9ofIn9gqOlHzpmWncl6mJ4YQuTX0HPx' -O data/pdfs/04_Product_Operations_Guide_and_Known_Issues.pdf
-      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1sC_cN29oCEHvmAELgMRdn91njIMFU17e' -O data/pdfs/05_Northstar_Logistics_Enterprise_Agreement.pdf
-      wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1j_O-As-w6biUXSXlefpka4SjvSoqhoV7' -O data/pdfs/06_LumenWorks_Service_Agreement.pdf
+      echo "📊 Creating database file..."
+      # ✅ Use the EXACT path that router expects
+      DB_PATH="/opt/render/project/src/parcelpilot.db"
       
-      echo "✅ Data downloaded!"
-      
-      # ✅ CREATE TABLES FIRST
-      echo "📊 Creating database tables..."
+      echo "Creating database at: $DB_PATH"
       python -c "
 import sqlite3
-conn = sqlite3.connect('/opt/render/project/src/parcelpilot.db')
-conn.execute('CREATE TABLE IF NOT EXISTS accounts (account_id TEXT PRIMARY KEY, account_name TEXT, plan TEXT, status TEXT, csm TEXT, contract_file TEXT, premium_support TEXT, notes TEXT)')
-conn.execute('CREATE TABLE IF NOT EXISTS orders (order_id TEXT PRIMARY KEY, account_id TEXT, carrier TEXT, status TEXT, booked_at TIMESTAMP, pickup_window_start TIMESTAMP, pickup_window_end TIMESTAMP, pickup_actual_at TIMESTAMP, shipment_fee_inr REAL, carrier_fault INTEGER, customer_fault INTEGER, cancellation_requested_at TIMESTAMP, notes TEXT)')
-conn.execute('CREATE TABLE IF NOT EXISTS tickets (ticket_id TEXT PRIMARY KEY, account_id TEXT, created_at TIMESTAMP, status TEXT, subject TEXT, description TEXT, channel TEXT, assigned_to TEXT, last_customer_message_at TIMESTAMP, historical_resolution TEXT)')
-conn.execute('CREATE TABLE IF NOT EXISTS documents (doc_id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT, doc_type TEXT, authority_level INTEGER, account_scope TEXT, is_current INTEGER, content TEXT, metadata TEXT)')
+import os
+
+# Make sure directory exists
+os.makedirs('/opt/render/project/src', exist_ok=True)
+
+db_path = '$DB_PATH'
+print(f'Creating database at: {db_path}')
+
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+
+# Create tables
+cursor.execute('CREATE TABLE IF NOT EXISTS accounts (account_id TEXT PRIMARY KEY, account_name TEXT, plan TEXT, status TEXT, csm TEXT, contract_file TEXT, premium_support TEXT, notes TEXT)')
+cursor.execute('CREATE TABLE IF NOT EXISTS orders (order_id TEXT PRIMARY KEY, account_id TEXT, carrier TEXT, status TEXT, booked_at TIMESTAMP, pickup_window_start TIMESTAMP, pickup_window_end TIMESTAMP, pickup_actual_at TIMESTAMP, shipment_fee_inr REAL, carrier_fault INTEGER, customer_fault INTEGER, cancellation_requested_at TIMESTAMP, notes TEXT)')
+cursor.execute('CREATE TABLE IF NOT EXISTS tickets (ticket_id TEXT PRIMARY KEY, account_id TEXT, created_at TIMESTAMP, status TEXT, subject TEXT, description TEXT, channel TEXT, assigned_to TEXT, last_customer_message_at TIMESTAMP, historical_resolution TEXT)')
+cursor.execute('CREATE TABLE IF NOT EXISTS documents (doc_id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT, doc_type TEXT, authority_level INTEGER, account_scope TEXT, is_current INTEGER, content TEXT, metadata TEXT)')
+
 conn.commit()
 conn.close()
-print('✅ Tables created!')
+print('✅ Database created!')
+
+# Verify
+if os.path.exists(db_path):
+    print(f'✅ Database file exists: {db_path} ({os.path.getsize(db_path)} bytes)')
+else:
+    print('❌ Database file NOT found!')
+    exit(1)
 "
       
-      # ✅ LOAD DATA
-      echo "📊 Loading data..."
-      python -c "from src.ingestion.data_loader import DataLoader; DataLoader().load_excel('data/excel/ParcelPilot_Assessment_Data.xlsx'); DataLoader().load_pdfs('data/pdfs')"
+      # ✅ Set DB_PATH environment variable for data loader
+      export DB_PATH="/opt/render/project/src/parcelpilot.db"
+      
+      echo "📊 Loading data into $DB_PATH..."
+      python -c "import os; os.environ['DB_PATH'] = '/opt/render/project/src/parcelpilot.db'; from src.ingestion.data_loader import DataLoader; DataLoader().load_excel('data/excel/ParcelPilot_Assessment_Data.xlsx'); DataLoader().load_pdfs('data/pdfs')"
+      
+      echo "✅ Build complete!"
       
     startCommand: uvicorn src.api.endpoints:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GROQ_API_KEY
         sync: false
-      - key: LLM_MODEL
-        value: openai/gpt-oss-120b
       - key: DB_PATH
-        value: ./parcelpilot.db
+        value: /opt/render/project/src/parcelpilot.db
       - key: CHROMA_PATH
-        value: ./chroma_db
+        value: /opt/render/project/src/chroma_db
