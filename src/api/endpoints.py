@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import uvicorn
+from src.ingestion.init_db import init_database
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -19,6 +20,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from src.api.models import ChatRequest, ChatResponse, ResumeRequest, HealthResponse
 from src.agent.graph import AgentRunner
 
+init_database()
 # ============================================================
 # APP INITIALIZATION
 # ============================================================
