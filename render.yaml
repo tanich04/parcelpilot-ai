@@ -14,8 +14,8 @@ services:
     
       echo "Loading data..."
     
-      python -c "from src.ingestion.data_loader import DataLoader; dl = DataLoader(); dl.load_excel('data/excel/ParcelPilot_Assessment_Data.xlsx'); dl.load_pdfs('data/pdfs')"
-    
+      python -m src.ingestion.data_loader
+      
       echo "Build complete!"      
     startCommand: uvicorn src.api.endpoints:app --host 0.0.0.0 --port $PORT
     envVars:
